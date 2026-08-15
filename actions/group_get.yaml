@@ -1,0 +1,22 @@
+ref: keycloak.group_get
+label: "Get Group"
+description: "Get one group by internal UUID, not group name or path"
+enabled: true
+runner_type: python
+runtime_version: ">=3.10"
+entry_point: keycloak_action.py
+parameter_delivery: stdin
+parameter_format: json
+output_format: json
+default_execution_permission_set_refs: [standard]
+parameters:
+  credential_key: {type: string, default: keycloak.credentials, required: true, description: "Pack-owned encrypted Keycloak credential Key ref"}
+  realm: {type: string, required: true, description: "Target realm name, not realm ID"}
+  group_id: {type: string, required: true, description: "Internal Keycloak group UUID, not group name/path"}
+  timeout_seconds: {type: integer, minimum: 1, maximum: 120, default: 30}
+output:
+  operation: {type: string}
+  realm: {type: string}
+  data: {type: any}
+  meta: {type: object}
+tags: [keycloak, group, read]

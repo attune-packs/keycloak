@@ -1,0 +1,23 @@
+ref: keycloak.user_delete
+label: "Delete User"
+description: "Delete one user by internal UUID with exact confirmation"
+enabled: true
+runner_type: python
+runtime_version: ">=3.10"
+entry_point: keycloak_action.py
+parameter_delivery: stdin
+parameter_format: json
+output_format: json
+default_execution_permission_set_refs: [standard]
+parameters:
+  credential_key: {type: string, default: keycloak.credentials, required: true, description: "Pack-owned encrypted Keycloak credential Key ref"}
+  realm: {type: string, required: true, description: "Target realm name, not realm ID"}
+  user_id: {type: string, required: true, description: "Internal Keycloak user UUID, not username"}
+  confirm: {type: string, required: true, description: "Must equal delete:<realm>:user:<user_id>"}
+  timeout_seconds: {type: integer, minimum: 1, maximum: 120, default: 30}
+output:
+  operation: {type: string}
+  realm: {type: string}
+  data: {type: any}
+  meta: {type: object}
+tags: [keycloak, user, delete]

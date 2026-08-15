@@ -1,0 +1,13 @@
+This product includes a substantially modified adaptation of the StackStorm
+Exchange Keycloak pack, version 1.0.0, originally attributed to Michael Devlin.
+
+Source: https://github.com/StackStorm-Exchange/stackstorm-keycloak
+Revision: f978f295fbdcf72d3bde62d73d3ea023ed45378f
+Revision date: 2021-12-19
+License: Apache License 2.0
+
+The implementation was rebuilt for Attune and Keycloak 26.7.1. The direct REST
+client, action selection, endpoint paths, schemas, pagination, credential/TLS
+handling, and safety controls are new. No python-keycloak implementation code
+was retained. The upstream repository did not contain a NOTICE file at the
+verified revision.

@@ -1,0 +1,34 @@
+ref: keycloak.user_search
+label: "Search Users"
+description: "Search users in one explicit realm with bounded pagination"
+enabled: true
+runner_type: python
+runtime_version: ">=3.10"
+entry_point: keycloak_action.py
+parameter_delivery: stdin
+parameter_format: json
+output_format: json
+default_execution_permission_set_refs: [standard]
+parameters:
+  credential_key: {type: string, default: keycloak.credentials, required: true, description: "Pack-owned encrypted Keycloak credential Key ref"}
+  realm: {type: string, required: true, description: "Target realm name, not realm ID"}
+  search: {type: string, description: "Keycloak general user search text"}
+  username: {type: string}
+  email: {type: string}
+  firstName: {type: string}
+  lastName: {type: string}
+  q: {type: string, description: "Custom attribute query in key:value form"}
+  exact: {type: boolean}
+  enabled: {type: boolean}
+  emailVerified: {type: boolean}
+  first: {type: integer, minimum: 0, default: 0}
+  max_results: {type: integer, minimum: 1, maximum: 1000, default: 100}
+  all_pages: {type: boolean, default: false}
+  max_total: {type: integer, minimum: 1, maximum: 10000, default: 1000}
+  timeout_seconds: {type: integer, minimum: 1, maximum: 120, default: 30}
+output:
+  operation: {type: string}
+  realm: {type: string}
+  data: {type: any}
+  meta: {type: object}
+tags: [keycloak, user, search, read]
