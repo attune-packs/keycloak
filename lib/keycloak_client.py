@@ -12,7 +12,7 @@ from urllib.parse import quote, unquote, urlencode, urlsplit
 from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
 
-DEFAULT_CREDENTIAL_KEY = "keycloak.credentials"
+DEFAULT_CREDENTIAL_KEY = "pack.keycloak.credentials"
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 _UUID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 _SENSITIVE = re.compile(r"(?:password|secret|token|credential|private.?key|api.?key)", re.IGNORECASE)
@@ -53,7 +53,7 @@ def _fetch_key(key_ref: str) -> Any:
         import attune
         from attune.api_client.api.secrets import get_key
 
-        response = get_key.sync_detailed(client=attune.context.client, key_ref=key_ref)
+        response = get_key.sync_detailed(key_ref, client=attune.context.client)
     except Exception as exc:
         raise KeycloakPackError(f"could not read Attune Key ({type(exc).__name__})") from None
     if response.status_code != 200 or response.parsed is None:

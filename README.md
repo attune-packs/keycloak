@@ -12,7 +12,7 @@ release, license, and documentation baseline.
 - HTTPS reachability from the worker to Keycloak.
 - A confidential Keycloak client/service account with only the realm-management
   permissions needed by the selected actions.
-- An encrypted, pack-owned Attune Key, normally `keycloak.credentials`.
+- An encrypted, pack-owned Attune Key, normally `pack.keycloak.credentials`.
 
 ## Credential Key
 

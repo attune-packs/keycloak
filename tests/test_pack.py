@@ -8,6 +8,7 @@ from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import parse_qs
 import sys
+import types
 import unittest
 from unittest import mock
 
@@ -96,7 +97,7 @@ class MetadataTests(unittest.TestCase):
                 }.items():
                     self.assertRegex(text, rf"(?m)^{field}: {value}$")
                 self.assertIn("default_execution_permission_set_refs: [standard]", text)
-                self.assertRegex(text, r"credential_key: \{[^\n]*default: keycloak\.credentials")
+                self.assertRegex(text, r"credential_key: \{[^\n]*default: pack\.keycloak\.credentials")
                 for field in ("operation", "realm", "data", "meta"):
                     self.assertRegex(text, rf"(?m)^  {field}: \{{type:")
                 self.assertNotRegex(text, r"(?m)^  (?:password|client_secret|access_token):")
@@ -126,6 +127,31 @@ class MetadataTests(unittest.TestCase):
 
 
 class ClientTests(unittest.TestCase):
+    def test_key_lookup_uses_current_sdk_signature(self):
+        calls = {}
+        get_key = types.ModuleType("attune.api_client.api.secrets.get_key")
+
+        def sync_detailed(ref, *, client):
+            calls.update(ref=ref, client=client)
+            data = types.SimpleNamespace(value={"client_secret": "REDACTED"})
+            return types.SimpleNamespace(status_code=200, parsed=types.SimpleNamespace(data=data))
+
+        get_key.sync_detailed = sync_detailed
+        secrets = types.ModuleType("attune.api_client.api.secrets")
+        secrets.get_key = get_key
+        attune = types.ModuleType("attune")
+        attune.context = types.SimpleNamespace(client="execution-client")
+        modules = {
+            "attune": attune,
+            "attune.api_client": types.ModuleType("attune.api_client"),
+            "attune.api_client.api": types.ModuleType("attune.api_client.api"),
+            "attune.api_client.api.secrets": secrets,
+        }
+        with mock.patch.dict(sys.modules, modules):
+            value = client._fetch_key("pack.keycloak.credentials")
+        self.assertEqual(value["client_secret"], "REDACTED")
+        self.assertEqual(calls, {"ref": "pack.keycloak.credentials", "client": "execution-client"})
+
     def test_credentials_require_https_explicit_realms_and_one_auth_method(self):
         bad = [
             credential(base_url="http://keycloak.invalid"),
@@ -297,7 +323,7 @@ class ClientTests(unittest.TestCase):
             client._merge_secret_config(body, {})
         safe = {"alias": "oidc", "providerId": "oidc", "config": {"clientId": "example"}}
         with mock.patch.object(client, "_fetch_key", return_value={"clientSecret": "TOP-SECRET"}):
-            merged = client._merge_secret_config(safe, {"secret_config_key": "keycloak.idp.oidc"})
+            merged = client._merge_secret_config(safe, {"secret_config_key": "pack.keycloak.idp_oidc"})
         self.assertEqual("TOP-SECRET", merged["config"]["clientSecret"])
         redacted = client._redact({"config": merged["config"], "access_token": "TOKEN"})
         self.assertEqual("[REDACTED]", redacted["config"]["clientSecret"])
@@ -309,7 +335,7 @@ class ClientTests(unittest.TestCase):
             kc, "request", return_value=({"success": True}, {"http_status": 204})
         ) as request:
             client._execute(kc, "user_reset_password", {
-                "realm": "tenant-a", "user_id": USER, "password_key": "keycloak.user.password",
+                "realm": "tenant-a", "user_id": USER, "password_key": "pack.keycloak.user_password",
                 "temporary": False,
             })
         self.assertEqual("NEW-SECRET", request.call_args.kwargs["body"]["value"])

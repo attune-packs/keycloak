@@ -10,7 +10,7 @@ parameter_format: json
 output_format: json
 default_execution_permission_set_refs: [standard]
 parameters:
-  credential_key: {type: string, default: keycloak.credentials, required: true, description: "Pack-owned encrypted Keycloak credential Key ref"}
+  credential_key: {type: string, default: pack.keycloak.credentials, required: true, description: "Pack-owned encrypted Keycloak credential Key ref"}
   realm: {type: string, required: true, description: "Target realm name, not realm ID"}
   user_id: {type: string, required: true, description: "Internal Keycloak user UUID, not username"}
   confirm: {type: string, required: true, description: "Must equal delete:<realm>:user:<user_id>"}
